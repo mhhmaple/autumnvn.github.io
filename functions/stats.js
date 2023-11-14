@@ -1,6 +1,14 @@
 export async function onRequestGet({ env }) {
     const query = `{
-        user(login: "AutumnVN") {
+        a: repository(owner: "AutumnVN", name: "chino.pages.dev") { stargazers { totalCount } forks { totalCount } }
+        b: repository(owner: "AutumnVN", name: "debloat-premid") { stargazers { totalCount } forks { totalCount } }
+        c: repository(owner: "AutumnVN", name: "loli") { stargazers { totalCount } forks { totalCount } }
+        d: repository(owner: "AutumnVN", name: "highlight") { stargazers { totalCount } forks { totalCount } }
+        e: repository(owner: "Vendicated", name: "Vencord") { stargazers { totalCount } forks { totalCount } }
+        f: repository(owner: "Vencord", name: "vencord.dev") { stargazers { totalCount } forks { totalCount } }
+        g: repository(owner: "ppy", name: "osu-wiki") { stargazers { totalCount } forks { totalCount } }
+
+        z: user(login: "AutumnVN") {
             repositories(first: 100, ownerAffiliations: OWNER) {
                 nodes {
                     stargazerCount
@@ -32,14 +40,24 @@ export async function onRequestGet({ env }) {
         body: JSON.stringify({ query })
     }).then(r => r.json());
 
-    const star = data.user.repositories.nodes.reduce((a, b) => a + b.stargazerCount, 0);
-    const fork = data.user.repositories.nodes.reduce((a, b) => a + b.forkCount, 0);
-    const commit = data.user.contributionsCollection.totalCommitContributions;
-    const pr = data.user.pullRequests.totalCount;
-    const issue = data.user.issues.totalCount;
-    const repo = data.user.repositoriesContributedTo.totalCount;
+    const repos = Object.values(data);
+    const stats = repos.pop();
 
-    const res = [star, fork, commit, pr, issue, repo];
+    const statsArr = [
+        stats.repositories.nodes.reduce((a, b) => a + b.stargazerCount, 0),
+        stats.repositories.nodes.reduce((a, b) => a + b.forkCount, 0),
+        stats.contributionsCollection.totalCommitContributions,
+        stats.pullRequests.totalCount,
+        stats.issues.totalCount,
+        stats.repositoriesContributedTo.totalCount
+    ];
+
+    const res = repos.map(i => ([
+        i.stargazers.totalCount,
+        i.forks.totalCount
+    ]));
+
+    res.push(statsArr);
 
     return new Response(JSON.stringify(res), {
         headers: {

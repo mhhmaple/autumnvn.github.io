@@ -99,13 +99,11 @@ function update(selector, value = '') {
 }
 
 !async function () {
-    const data = await fetch('/stats').then(r => r.json());
-    document.querySelectorAll('.stat').forEach((stat, i) => stat.textContent = data[i]);
-}();
-
-!async function () {
-    const data = await fetch('/repo').then(r => r.json());
-    ['star', 'fork'].forEach(s => document.querySelectorAll(`.${s}`).forEach((repo, i) => repo.textContent = data[i][s]));
+    const repos = await fetch('/stats').then(r => r.json());
+    const stats = repos.pop();
+    document.querySelectorAll('.stat').forEach((stat, i) => stat.textContent = stats[i]);
+    document.querySelectorAll('.star').forEach((star, i) => star.textContent = repos[i][0]);
+    document.querySelectorAll('.fork').forEach((fork, i) => fork.textContent = repos[i][1]);
 }();
 
 !function lanyard() {
